@@ -2,6 +2,7 @@ import gzip
 import urllib2
 import os
 import sys
+import traceback
 
 from argparse import ArgumentParser
 from cStringIO import StringIO
@@ -110,6 +111,9 @@ def get_job_log(repo_name, job_id):
         return str(th_client.get_artifacts(repo_name, **query_params)[0]['blob']['logurl'])
     except IndexError:
         print 'No artifacts for {}'.format(job_id)
+    except requests.exceptions.ConnectionError as e:
+        print 'Connection failed for {}'.format(job_id)
+        traceback.print_exc()
 
 
 def download_and_uncompress(url):
@@ -180,7 +184,6 @@ def process_jobs(repo_name, revision, th_jobs, beg_string, end_string, num_of_jo
             )
         except Exception as e:
             print "Failing job {}".format(job_id)
-            import traceback
             traceback.print_exc()
             break
 
